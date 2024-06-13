@@ -1,6 +1,7 @@
 import css from "./ContactForm.module.css";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as yup from "yup";
+import { useState } from "react";
 
 export default function ContactForm({ onContact }) {
   const validationSchema = yup.object().shape({
@@ -15,6 +16,19 @@ export default function ContactForm({ onContact }) {
       .required("Required"),
   });
 
+  const formatPhoneNumber = (value) => {
+    // Видалити всі нечислові символи
+    const numericValue = value.replace(/\D/g, "");
+
+    // Додавання "-" між відповідними групами цифр
+    const formattedValue = numericValue.replace(
+      /(\d{3})(\d{2})(\d{2})/,
+      "$1-$2-$3"
+    );
+
+    return formattedValue;
+  };
+
   return (
     <div>
       <Formik
@@ -28,40 +42,50 @@ export default function ContactForm({ onContact }) {
           resetForm();
         }}
       >
-        <Form className={css.form}>
-          <div>
-            <label htmlFor="username_text" className={css.label}>
-              Name
-              <Field
-                type="text"
-                name="name"
-                className={css.input}
-                id="username_text"
-                placeholder="Ivan"
-              />
-              <ErrorMessage name="name" component="div" className={css.error} />
-            </label>
-          </div>
-          <div>
-            <label htmlFor="user_number" className={css.label}>
-              Number
-              <Field
-                name="number"
-                className={css.input}
-                id="user_number"
-                placeholder="123-45-67"
-              />
-              <ErrorMessage
-                name="number"
-                component="div"
-                className={css.error}
-              />
-            </label>
-          </div>
-          <button className={css.btn} type="submit">
-            Add Contact
-          </button>
-        </Form>
+        {({ setFieldValue }) => (
+          <Form className={css.form}>
+            <div>
+              <label htmlFor="username_text" className={css.label}>
+                Name
+                <Field
+                  type="text"
+                  name="name"
+                  className={css.input}
+                  id="username_text"
+                  placeholder="Viktor"
+                />
+                <ErrorMessage
+                  name="name"
+                  component="div"
+                  className={css.error}
+                />
+              </label>
+            </div>
+            <div>
+              <label htmlFor="user_number" className={css.label}>
+                Number
+                <Field
+                  name="number"
+                  className={css.input}
+                  id="user_number"
+                  placeholder="123-45-67"
+                  onChange={(e) => {
+                    const formattedNumber = formatPhoneNumber(e.target.value);
+                    setFieldValue("number", formattedNumber);
+                  }}
+                />
+                <ErrorMessage
+                  name="number"
+                  component="div"
+                  className={css.error}
+                />
+              </label>
+            </div>
+            <button className={css.btn} type="submit">
+              Add Contact
+            </button>
+          </Form>
+        )}
       </Formik>
     </div>
   );
